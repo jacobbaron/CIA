@@ -2,6 +2,9 @@ close all;
 clear;
 clc;
 
+global  odor_seq  image_times;
+global odor_list odor_concentration_list odor_colormap;
+
 %%
 p1 = mfilename
 p2 = mfilename('fullpath')
@@ -11,45 +14,8 @@ path = [currentFolder, 'data\'];
 load([path, 'odor_inf'], 'odor_list', 'odor_concentration_list', 'odor_colormap');
 
 addpath(pwd)
-
-%%
-global  odor_seq  image_times;
-global odor_list odor_concentration_list odor_colormap;
-
-if exist('pathname', 'var')
-        try
-            if isdir(pathname)
-            cd(pathname);
-            end
-        end
-end
 [filename,pathname]  = uigetfile({'*.nd2'});  
-   
-fname = [pathname filename];
  
-if ~exist('data','var')
-     data=bfopen(fname);   
-end
- 
-[num_series,~]=size(data);
- 
-if ~exist('z','var')
-    
-    z=input('Please enter start and end z sections you want to analyze:','s');
-    z=str2num(z);
-    zplane=z(1):z(2);
-        
-end
-
-if ~exist('frames','var')   
-    frames=input('Please enter start and end frames for analyzing the data:','s');
-    frames=str2num(frames);
-end
-
-istart=frames(1);
-iend=frames(2);
-num_t=iend-istart+1; %number of time series
-
 %% load the log file
 disp('Choose the log file of this experiment.');
 [filename_log]  =  uigetfile([pathname, 'log_*.txt']);
@@ -72,6 +38,54 @@ for i = 1:numberOfLines-num_
     odor_inf(i, :) = textscan(allText{1,1}{i+num_,1}, ...
         fmt, 'Delimiter','\t');
 end
+
+%%
+
+if exist('pathname', 'var')
+        try
+            if isdir(pathname)
+            cd(pathname);
+            end
+        end
+end
+
+   
+fname = [pathname filename];
+ 
+if ~exist('data','var')
+     data=bfopen(fname);   
+end
+ 
+[num_series,~]=size(data);
+ omeMeta=data{1,4};
+if ~exist('z','var')
+    zrange=omeMeta.getPixelsSizeZ(0).getValue();
+    z=input('Please enter start and end z sections you want to analyze (leave blank to include all planes):','s');
+    if isempty(z)
+        z=[1,zrange];
+    else
+        z=str2num(z);
+    end
+    zplane=z(1):z(2);
+        
+end
+
+if ~exist('frames','var')   
+    trange=omeMeta.getPixelsSizeT(0).getValue();
+    frames=input('Please enter start and end frames for analyzing the data (leave blank to inclue all frames):','s');
+    if isempty(frames)
+        frames=[1,trange];
+    else
+        frames=str2num(frames);
+    end
+end
+
+istart=frames(1);
+iend=frames(2);
+num_t=iend-istart+1; %number of time series
+
+acq_start_time=datetime({omeMeta.getImageAcquisitionDate(0).getValue()},...
+    'InputFormat','uuuu-MM-dd''T''HH:mm:ss');
 
 %%
 if (num_series==1)
@@ -137,29 +151,22 @@ if ~exist('img_stack_maxintensity','var')
     img_stack_maxintensity=zeros(m,n,num_t); %maximum intensity projection stack along z 
 
     for i=istart:iend
-        
         k=i-istart+1;
-        
         img_stack=zeros(m,n,length(zplane));
                     
         for j=1:length(zplane)
-            
             if ~mcherry
                 if isempty(z_start)
                     img_stack(:,:,j)=imagelist{i, 1};
                 else
                     img_stack(:,:,j)=imagelist{(i-1)*num_z*num_c + num_c*(zplane(j)-1) + channel_num,1};
                 end
-                
             else
-                
                 imagelist=data{zplane(j),1};
                 %img_stack(:,:,j)=imagelist{2*i-1,1};
                 img_stack(:,:,j)=imagelist{i,1};
             end
-            
         end
-    
         img_stack_maxintensity(:,:,k)=max(img_stack,[],3);
     
     end
@@ -176,12 +183,16 @@ for i=istart:iend
 
     j = i-istart+1;
 
-    index = j*num_z - 1;
+    index = i*num_z - 1;
     image_times(j) = metadata.get(['timestamp ' num2str(index)]);
 end
 
 
 %% get the odor sequence
 odor_seq = getodorseq( image_times,  odor_inf);
+
+[odor_start_time, odor_end_time]=calculate_odor_start_end_time(acq_start_time,image_times,odor_seq);
+
+
 
 return;

@@ -77,8 +77,8 @@ set(handles.figure1, 'Position', [400 400 width height+45]);
 set(handles.slider1, 'Position', [0 2 width 18]);
 axes(handles.axes1);
 handles.low=0;
-handles.high=500;
-handles.tracking_threshold=40;
+handles.high=2500;
+handles.tracking_threshold=150;
 handles.search_radius = 0;
 img=imagesc(handles.img_stack(:,:,handles.istart),[handles.low handles.high]);
 colormap(gray);
@@ -310,12 +310,15 @@ assignin('base','signal',handles.signal);
 assignin('base','normalized_signal',handles.normalized_signal);
 assignin('base','dual_position_data',handles.neuronal_position);
 assignin('base','ratio',handles.ratio);
-neuron_position_data=zeros(length(handles.neuronal_position),2);
-for i=1:length(handles.neuronal_position)
-    neuron_position_data(i,:)=handles.neuronal_position{i,1};
-end
-assignin('base','neuron_position_data',neuron_position_data);
-    
+% neuron_position_data=zeros(length(handles.neuronal_position),2);
+% for i=1:length(handles.neuronal_position)
+%     neuron_position_data(i,:)=handles.neuronal_position{i,1};
+% end
+
+neuron_position_data=handles.neuronal_position;
+
+% assignin('base','neuron_position_data',neuron_position_data);
+assignin('base','ROI_radius',num2cell(handles.r));
 
 
 % --------------------------------------------------------------------

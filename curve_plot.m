@@ -1,4 +1,4 @@
-function curve_plot(signal, image_times, odor_seq)
+function leg=curve_plot(signal, image_times, odor_seq,varargin)
 
 global neuron_list;
 global odor_list odor_concentration_list odor_colormap;
@@ -6,13 +6,17 @@ global odor_list odor_concentration_list odor_colormap;
 colorset = varycolor(length(signal));
 
 %% input the neuron name
-% if ~exist('neuron_list','var')   
+ if isempty(varargin)   
     neuron_list = cell(1,2);
     
     for i =1:length(signal)
         neuron_list{i}=input(['Please enter the name of neurons #', num2str(i), ':'],'s');
     end
-% end
+ else
+     neuron_list=varargin{1};
+ end
+ 
+ 
 
 
 %% plot curves
@@ -108,8 +112,12 @@ for j = 1:1:length(CC)
     else
         ind_odor = floor(CC(j)/length(odor_concentration_list))+1;
         ind_conc = rem(CC(j), length(odor_concentration_list));
+        if ind_conc ==0 % added Sep 24, fix bug when rem==0
+            ind_conc = length(odor_concentration_list);
+        end
         
         str_odor = odor_list{ind_odor};
+
         str_conc = odor_concentration_list{ind_conc};
         
         l_str = {[str_conc, ' ', str_odor]};
@@ -118,11 +126,11 @@ for j = 1:1:length(CC)
     legend_text(j+dim(2)) = l_str;
 end
 
-legend(legend_text, 'Location','NorthEastOutside', 'FontSize', text_size);
+leg=legend(legend_text, 'Location','NorthEastOutside', 'FontSize', text_size);
 
 post = get(gcf, 'Position');
 set(gcf, 'Position', [post(1), post(2), 960, 250])
-
+xlim([image_times(1),image_times(end)])
 % %% save figure
 % saveas(gcf,[pathname, filename, '-', neuron_type,'.fig']);
 end

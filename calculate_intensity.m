@@ -2,7 +2,7 @@
 function mean_F = calculate_intensity(F,n)
 
 if nargin==1
-    n=20;
+    n=30;
 end
 
 F_sorted=sort(F,'descend');
