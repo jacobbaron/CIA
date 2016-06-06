@@ -88,6 +88,24 @@ acq_start_time=datetime({omeMeta.getImageAcquisitionDate(0).getValue()},...
     'InputFormat','uuuu-MM-dd''T''HH:mm:ss');
 
 %%
+if (num_series==1)
+    imagelist=data{1,1};
+    [m,n]=size(imagelist{1,1});
+    disp(imagelist{1,2});
+    mcherry=0;
+    disp('the stack does not have red channels');
+else
+    mcherry=1;
+    imagelist=data{1,1};
+    [m,n]=size(imagelist{1,1});
+    disp('the stack has red channels');
+end
+
+% if ~exist('num_z','var')
+%     num_z=input('Please enter the total number of z sections in the data set:','s');
+%     num_z=str2double(num_z); 
+% end
+
 
 %figure out the totle number of z sections, to replace the input of this information
 image_inf = data{1}{1,2};
