@@ -1,6 +1,7 @@
 function curve_plot(signal, image_times, odor_seq)
 
-global odor_map    neuron_list;
+global neuron_list;
+global odor_list odor_concentration_list odor_colormap;
 
 colorset = varycolor(length(signal));
 
@@ -54,10 +55,9 @@ Y = X;
 Y(1, :) = ax(3);    Y(2, :) = ax(3);    Y(3, :) = ax(4);    Y(4, :) = ax(4);
      
 %% XX YY and CC_color
-cm = lines(64);     %colormap for patch
-cm(1,:) = [1 1 1];  %set 0('water') as blank.
+cm = odor_colormap;     
 
-CC = unique(odor_seq);
+CC = unique(odor_seq, 'stable');
 XX = cell(1,length(CC));
 YY = XX;
 
@@ -69,7 +69,11 @@ end
 
 CC_color = zeros(length(CC) ,3);
 for i =1:length(CC)
-    CC_color(i,:) = cm(CC(i)+1,:);
+    if CC(i) == 0
+        CC_color(i,:)=[1 1 1];
+    else
+        CC_color(i,:) = cm(CC(i),:);
+    end    
 end
 
 
@@ -99,9 +103,19 @@ for i = 1:dim(2)
     legend_text(i) = neuron_list(i);
 end
 for j = 1:1:length(CC)
-    index_temp = strcmp(num2str(CC(j)), odor_map);
-    index = find(index_temp == 1);
-    legend_text(j+dim(2)) = odor_map(index-length(odor_map));
+    if CC(j)==0
+        l_str = {'Water'};
+    else
+        ind_odor = floor(CC(j)/length(odor_concentration_list))+1;
+        ind_conc = rem(CC(j), length(odor_concentration_list));
+        
+        str_odor = odor_list{ind_odor};
+        str_conc = odor_concentration_list{ind_conc};
+        
+        l_str = {[str_conc, ' ', str_odor]};
+    end
+    
+    legend_text(j+dim(2)) = l_str;
 end
 
 legend(legend_text, 'Location','NorthEastOutside', 'FontSize', text_size);

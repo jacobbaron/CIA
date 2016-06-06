@@ -1,75 +1,54 @@
 function odor_seq = getodorseq( image_times,  odor_inf)
 %GETODORSEQ Summary of this function goes here
 
-global odor_map;
+%load the file of the information of odor, concentration, and colormap.
+global odor_list odor_concentration_list odor_colormap;
 
-odor_map = {'water' '0'; ...
-    '10^-7 1-pentanol' '1'; ...
-    '10^-6 1-pentanol' '2'; ...
-    '10^-5 1-pentanol' '3'; ...
-    '10^-4 1-pentanol' '4'; ...
-    '10^-3 1-pentanol' '5'; ...
-    'sucrose' '6'; ...
-    '10^-8 3-octanol' '7'; ...
-    '10^-7 3-octanol' '8'; ...
-    '10^-6 3-octanol' '9'; ...
-    '10^-5 3-octanol' '10'; ...
-    '10^-4 3-octanol' '11'; ...
-    '10^-3 3-octanol' '12'; ...
-    '10^-7 6-methyl-5-hepten-2-ol' '13'; ...
-    '10^-6 6-methyl-5-hepten-2-ol' '14'; ...
-    '10^-5 6-methyl-5-hepten-2-ol' '15'; ...
-    '10^-4 6-methyl-5-hepten-2-ol' '16'; ...
-    '10^-7 trans-3-hexen-1-ol' '17'; ...
-    '10^-6 trans-3-hexen-1-ol' '18'; ...
-    '10^-5 trans-3-hexen-1-ol' '19'; ...
-    '10^-4 trans-3-hexen-1-ol' '20'; ...
-    '10^-7 3-pentanol' '21'; ...
-    '10^-6 3-pentanol' '22'; ...
-    '10^-5 3-pentanol' '23'; ...
-    '10^-4 3-pentanol' '24'; ...
-    '10^-6 1-octanol' '25'; ...
-    '10^-4 1-octanol' '26'; ...
-    '10^-6 1-pentanol & 10^-6 3-pentanol' '27'; ...
-    '10^-6 3-pentanol & 10^-6 1-pentanol' '28'; ...
-    '10^-6 1-pentanol & 10^-6 6-methyl-5-hepten-2-ol' '29'; ...
-    '10^-6 3-pentanol & 10^-6 6-methyl-5-hepten-2-ol' '30'; ...
-    '10^-6 3-pentanol & 10^-6 1-pentanol & 10^-6 6-methyl-5-hepten-2-ol' '31';...
-    '50mM NaCl' '32'; ...
-    '50mM KCl' '33';...
-    '50mM NaBr' '34';...
-    '50mM KBr' '35'};
+seq_timeperiod = zeros(1, length(odor_inf));
+seq_odortype   = zeros(1, length(odor_inf));
 
-    seq_timeperiod = zeros(1, length(odor_inf));
-    seq_odortype   = zeros(1, length(odor_inf));
-    
-    for i=1:length(odor_inf)
-        seq_timeperiod(i) = odor_inf{i,2};
+for i=1:length(odor_inf)
+    seq_timeperiod(i) = odor_inf{i,2};
+end
+
+for i=1:length(odor_inf)
+    inf_str = odor_inf{i,1}{1};
+    ind = strfind(inf_str, ' ');
+
+    if isempty(ind)
+        %means it is water
+        seq_odortype(i) = 0;
+    else
+        %it is odor with concentration and odor name
+        str_conc = inf_str(1 : ind-1);
+        str_odor = inf_str(ind+1 : end);
+
+        index_conc_temp = strcmp(str_conc, odor_concentration_list);
+        index_conc = find(index_conc_temp);
+        
+        index_odor_temp = strcmp(str_odor, odor_list);
+        index_odor = find(index_odor_temp);
+
+        seq_odortype(i) = (index_odor-1)*length(odor_concentration_list) + index_conc;
     end
-    
-    for i=1:length(odor_inf)
-        index_temp = strcmp(odor_inf{i,1}{1}, odor_map);
-        index = find(index_temp == 1);
-        temp = odor_map(index + length(odor_map));
-        seq_odortype(i) = str2num(temp{1});
-    end
-    
-    delay_time = 0;
+end
 
-    seq_timeperiod_temp = [0 seq_timeperiod];
+delay_time = 0;
 
-    odor_seq = zeros(length(image_times), 1);
+seq_timeperiod_temp = [0 seq_timeperiod];
 
-    for i = 2:1: length(seq_timeperiod_temp)
-        left = sum(seq_timeperiod_temp(1:i-1))+ delay_time;
-        right= sum(seq_timeperiod_temp(1:i))+ delay_time;
+odor_seq = zeros(length(image_times), 1);
 
-        for j =1:1:length(image_times)
-            if image_times(j)>left  && image_times(j)<right
-                odor_seq(j) = seq_odortype(i-1);
-            end
+for i = 2:1: length(seq_timeperiod_temp)
+    left = sum(seq_timeperiod_temp(1:i-1))+ delay_time;
+    right= sum(seq_timeperiod_temp(1:i))+ delay_time;
+
+    for j =1:1:length(image_times)
+        if image_times(j)>left  && image_times(j)<right
+            odor_seq(j) = seq_odortype(i-1);
         end
     end
-    
-    odor_seq(length(image_times)) = odor_seq(length(image_times)-1);
+end
+
+odor_seq(length(image_times)) = odor_seq(length(image_times)-1);
 end

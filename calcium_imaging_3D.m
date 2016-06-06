@@ -3,10 +3,18 @@ clear;
 clc;
 
 %%
-addpath(pwd);
+p1 = mfilename
+p2 = mfilename('fullpath')
+currentFolder = strrep(p2, p1, '')
+
+path = [currentFolder, 'data\'];
+load([path, 'odor_inf'], 'odor_list', 'odor_concentration_list', 'odor_colormap');
+
+addpath(pwd)
 
 %%
 global  odor_seq  image_times;
+global odor_list odor_concentration_list odor_colormap;
 
 if exist('pathname', 'var')
         try
