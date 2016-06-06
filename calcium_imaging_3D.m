@@ -100,59 +100,71 @@ image_inf = data{1}{1,2};
 %     c_end   = strfind(image_inf, '; T=1/');
 %     num_c = str2double(image_inf(c_start+4 : c_end-1));
 % end
-num_c=omeMeta.getChannelCount(0);
+num_c=omeMeta.getPixelsSizeC(0).getValue();
+
+
 % select the number of channel
 if num_c ~= 1
-    channel = input('Please enter the channel for analyzing the data:','s');
-    channel_num = str2num(channel);
+    channel = input(sprintf('Please enter the channel for analyzing the data\n(enter nothing to import all channels):'),'s');
+    if isempty(channel)
+       channel_num=1:num_c; 
+       
+    else
+       channel_num = str2num(channel);
+       
+    end
 else
     channel_num = 1;
 end
 
-
+mcherry=0;
 
 %number of z section
-z_start = strfind(image_inf, 'Z=1/');
-
-if isempty(strfind(image_inf, 'C=1/'))
-    z_end   = strfind(image_inf, '; T=1/');
-else
-    z_end   = strfind(image_inf, '; C=1/');
-end
-
-if isempty(z_start)
-    num_z = 1;
-else
-    num_z = str2double(image_inf(z_start+4 : z_end-1));
-end
-
-
+% z_start = strfind(image_inf, 'Z=1/');
+% 
+% if isempty(strfind(image_inf, 'C=1/'))
+%     z_end   = strfind(image_inf, '; T=1/');
+% else
+%     z_end   = strfind(image_inf, '; C=1/');
+% end
+% 
+% if isempty(z_start)
+%     num_z = 1;
+% else
+%     num_z = str2double(image_inf(z_start+4 : z_end-1));
+% end
+num_z=zrange;
+m=omeMeta.getPixelsSizeY(0).getValue();
+n=omeMeta.getPixelsSizeX(0).getValue();
 
 if ~exist('img_stack_maxintensity','var')
     
     img_stack_maxintensity=zeros(m,n,num_t); %maximum intensity projection stack along z 
+    img_stack_channels=cell(1,length(channel_num));
+    for ii=1:length(channel_num)
+        for i=istart:iend
+            k=i-istart+1;
+            img_stack=zeros(m,n,length(zplane));
 
-    for i=istart:iend
-        k=i-istart+1;
-        img_stack=zeros(m,n,length(zplane));
-                    
-        for j=1:length(zplane)
-            if ~mcherry
-                if isempty(z_start)
-                    img_stack(:,:,j)=imagelist{i, 1};
+            for j=1:length(zplane)
+                if ~mcherry
+                    if zrange==1
+                        img_stack(:,:,j)=imagelist{i, 1};
+                    else
+                        img_stack(:,:,j)=imagelist{(i-1)*num_z*num_c + num_c*(zplane(j)-1) + channel_num(ii),1};
+                    end
                 else
-                    img_stack(:,:,j)=imagelist{(i-1)*num_z*num_c + num_c*(zplane(j)-1) + channel_num,1};
+                    imagelist=data{zplane(j),1};
+                    %img_stack(:,:,j)=imagelist{2*i-1,1};
+                    img_stack(:,:,j)=imagelist{i,1};
                 end
-            else
-                imagelist=data{zplane(j),1};
-                %img_stack(:,:,j)=imagelist{2*i-1,1};
-                img_stack(:,:,j)=imagelist{i,1};
             end
+            img_stack_maxintensity(:,:,k)=max(img_stack,[],3);
+
         end
-        img_stack_maxintensity(:,:,k)=max(img_stack,[],3);
-    
-    end
-    
+        img_stack_channels{ii}=img_stack;
+
+    end     
 end
 
 
