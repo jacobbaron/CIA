@@ -1,6 +1,6 @@
-close all;
-clear;
-clc;
+function [img_data]=import_nd2_files()
+
+
 
 global  odor_seq  image_times;
 global odor_list odor_concentration_list odor_colormap;
@@ -192,6 +192,19 @@ odor_seq = getodorseq( image_times,  odor_inf);
 
 [odor_start_time, odor_end_time]=calculate_odor_start_end_time(acq_start_time,image_times,odor_seq);
 
+%% save output data
+
+img_data=struct;
+img_data.img_stacks=img_stack_channels;
+img_data.t=image_times;
+img_data.neuron_type=neuron_type;
+img_data.odor_seq=odor_seq;
+img_data.acq_start_time=acq_start_time;
+img_data.odor_start_time=odor_start_time;
+img_data.filename=fname;
+img_data.filename_log=fname_log;
+img_data.metadata=metadata;
+img_data.omemeta=omeMeta;
 
 
 return;
