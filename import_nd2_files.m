@@ -1,24 +1,31 @@
-function [img_data]=import_nd2_files()
-
+function [img_data]=import_nd2_files(import_all,filename,filename_log)
+%import_all=1 if you want to import all data, otherwise, it will ask for
+%you to specify amount of data
 
 
 global  odor_seq  image_times;
 global odor_list odor_concentration_list odor_colormap;
 
 %%
-p1 = mfilename
-p2 = mfilename('fullpath')
-currentFolder = strrep(p2, p1, '')
+
+    p1 = mfilename
+    p2 = mfilename('fullpath')
+    currentFolder = strrep(p2, p1, '')
 
 path = [currentFolder, 'data\'];
 load([path, 'odor_inf'], 'odor_list', 'odor_concentration_list', 'odor_colormap');
 
 addpath(pwd)
-[filename,pathname]  = uigetfile({'*.nd2'});  
- 
+if isempty(filename) && isempty(filename_log)
+    [filename,pathname]  = uigetfile({'*.nd2'});  
+
 %% load the log file
-disp('Choose the log file of this experiment.');
-[filename_log]  =  uigetfile([pathname, 'log_*.txt']);
+    disp('Choose the log file of this experiment.');
+    [filename_log]  =  uigetfile([pathname, 'log_*.txt']);
+    
+else
+    pathname=strcat(pwd,filesep);
+end
 fname_log = [pathname filename_log];
 
 % number of lines
@@ -60,7 +67,11 @@ end
  omeMeta=data{1,4};
 if ~exist('z','var')
     zrange=omeMeta.getPixelsSizeZ(0).getValue();
-    z=input('Please enter start and end z sections you want to analyze (leave blank to include all planes):','s');
+    if isempty(import_all) || ~import_all
+        z=input('Please enter start and end z sections you want to analyze (leave blank to include all planes):','s');
+    else
+        z=[];
+    end
     if isempty(z)
         z=[1,zrange];
     else
@@ -72,7 +83,11 @@ end
 
 if ~exist('frames','var')   
     trange=omeMeta.getPixelsSizeT(0).getValue();
-    frames=input('Please enter start and end frames for analyzing the data (leave blank to inclue all frames):','s');
+     if isempty(import_all) || ~import_all
+        frames=input('Please enter start and end frames for analyzing the data (leave blank to inclue all frames):','s');
+    else
+        frames=[];
+    end
     if isempty(frames)
         frames=[1,trange];
     else
@@ -107,7 +122,11 @@ num_c=omeMeta.getPixelsSizeC(0).getValue();
 
 % select the number of channel
 if num_c ~= 1
-    channel = input(sprintf('Please enter the channel for analyzing the data\n(enter nothing to import all channels):'),'s');
+     if isempty(import_all) || ~import_all
+        channel = input(sprintf('Please enter the channel for analyzing the data\n(enter nothing to import all channels):'),'s');
+    else
+        channel=[];
+    end
     if isempty(channel)
        channel_num=1:num_c; 
        
