@@ -1,7 +1,8 @@
 function leg=curve_plot(signal, image_times, odor_seq,varargin)
 
 global neuron_list;
-global odor_list odor_concentration_list odor_colormap;
+%global odor_list odor_concentration_list odor_colormap;
+load odor_inf.mat
 
 colorset = varycolor(length(signal));
 
@@ -76,7 +77,11 @@ for i =1:length(CC)
     if CC(i) == 0
         CC_color(i,:)=[1 1 1];
     else
+        try
         CC_color(i,:) = cm(CC(i),:);
+        catch
+            1;
+        end
     end    
 end
 

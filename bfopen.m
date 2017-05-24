@@ -127,8 +127,11 @@ end
 
 numSeries = r.getSeriesCount();
 result = cell(numSeries, 2);
+h=waitbar(0,'Loading 0%...');
+
 for s = 1:numSeries
-    fprintf('Reading series #%d', s);
+    
+    %fprintf('Reading series #%d', s);
     r.setSeries(s - 1);
     pixelType = r.getPixelType();
     bpp = loci.formats.FormatTools.getBytesPerPixel(pixelType);
@@ -136,11 +139,13 @@ for s = 1:numSeries
     numImages = r.getImageCount();
     imageList = cell(numImages, 2);
     colorMaps = cell(numImages);
+    
     for i = 1:numImages
-        if mod(i, 72) == 1
-            fprintf('\n    ');
-        end
-        fprintf('.');
+        waitbar(i/numImages,h,sprintf('Loading series %d: %0.0f%%...',s,(i/numImages)*100));
+%         if mod(i, 72) == 1
+%             fprintf('\n    ');
+%         end
+%         fprintf('.');
         arr = bfGetPlane(r, i, varargin{:});
 
         % retrieve color map data
@@ -214,4 +219,5 @@ for s = 1:numSeries
     result{s, 4} = r.getMetadataStore();
     fprintf('\n');
 end
+close(h);
 r.close();
