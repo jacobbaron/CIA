@@ -82,11 +82,7 @@ volumes=volumes(1:length(img_idx));
 lasers=lasers(1:length(img_idx),:);
 image_times=zeros(max(volumes),1);
 for ii=1:max(volumes)
-    try
     image_times(ii)=mean(t(volumes==ii));
-    catch
-        1;
-    end
 end
 
 which_lasers=find(any(lasers,1));
@@ -96,11 +92,12 @@ zdiff_size=diff(zstack_pos);
 %initialize array
 img1=initialize_imgs(volumes,lasers,res,img_idx);
 x=waitbar(0,'Loading');
-for ii=1:max(volumes) %fill up array with data
-    waitbar(ii/max(volumes),x);
-    img1=get_volume(fname,ii,lasers,piezo,img_idx,res,volumes,img1);
-   
-end
+% for ii=1:max(volumes) %fill up array with data
+%     waitbar(ii/max(volumes),x);
+%     img1=get_volume(fname,ii,lasers,piezo,img_idx,res,volumes,img1);
+%    
+% end
+[img1] = get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img1);
 close(x)
 img_stacks=cell(size(img1,5),1);
 for ii=1:length(img_stacks)
