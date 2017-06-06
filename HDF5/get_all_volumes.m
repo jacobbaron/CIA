@@ -2,10 +2,10 @@ function [img,time]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img
     
         
         [~,~,int_piezo]=unique(piezo);
-        volumes_data=volumes(img_idx);
-        piezo = piezo(img_idx);
-        lasers = lasers(img_idx);
-        use_frames=volumes_data~=0;
+        %volumes=volumes(img_idx);
+        %piezo = piezo(img_idx);
+        %lasers = lasers(img_idx);
+        use_frames=volumes~=0;
         %frames=find(volumes==volume);
        
         %offset=prod(res)*(frames-1)+1;
@@ -29,14 +29,16 @@ function [img,time]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img
         [~,~,which_laser_idx]=unique(which_lasers(use_frames));
         data3d_use=data3d(:,:,use_frames);
         int_piezo_use=int_piezo(use_frames);
-        volumes_data=volumes_data(use_frames);
+        volumes=volumes(use_frames);
         for ii=1:length(which_laser_idx)
-            img(:,:,int_piezo_use(ii),volumes_data(ii),which_laser_idx(ii))=...
+            img(:,:,int_piezo_use(ii),volumes(ii),which_laser_idx(ii))=...
                 data3d_use(:,:,ii);
         end
-        unique_volumes=unique(volumes_data(volumes_data>0));
+        unique_volumes=unique(volumes(volumes>0));
         for ii=1:length(unique_volumes)
-           time(ii)=mean(t(volumes_data==unique_volumes(ii)));
+           time(ii)=mean(t(volumes==unique_volumes(ii)));
             
         end
+        img = flip(flip(permute(img,[2,1,3,4,5]),1),3);
+        
     
