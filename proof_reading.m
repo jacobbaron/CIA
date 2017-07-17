@@ -11,7 +11,7 @@ function varargout = proof_reading(varargin)
 %      the existing singleton*.
 %
 %      PROOF_READING('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in PROOF_READING.M with the given input arguments.
+%      function named CALLBACK in PROOF_READING.M wifth the given input arguments.
 %
 %      PROOF_READING('Property','Value,...) creates a new PROOF_READING or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
@@ -78,8 +78,8 @@ set(handles.slider1, 'Position', [0 2 width 18]);
 axes(handles.axes1);
 handles.low=0;
 handles.high=2500;
-handles.tracking_threshold=150;
-handles.search_radius = 0;
+handles.tracking_threshold=300;
+handles.search_radius = 10;
 img=imagesc(handles.img_stack(:,:,handles.istart),[handles.low handles.high]);
 colormap(gray);
 set(handles.axes1, ...
@@ -286,13 +286,30 @@ function SaveMenuItem_Callback(hObject, eventdata, handles)
 % hObject    handle to SaveMenuItem (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[fn, savepathname]= uiputfile('*.mat', 'choose file to save', strcat(handles.filename, '_',num2str(handles.istart),'-',num2str(handles.iend),'.mat'));
-if length(fn) > 1
-    fnamemat = strcat(savepathname,fn);
-    save(fnamemat);
-end
-    
 
+% [fn, savepathname]= uiputfile('*.mat', 'choose file to save', strcat(handles.filename, '_',num2str(handles.istart),'-',num2str(handles.iend),'.mat'));
+% if length(fn) > 1
+%     fnamemat = strcat(savepathname,fn);
+%     save(fnamemat);
+% end
+
+if length(questdlg('Save this data? Make sure you have exported everything! '))==3
+%    clear data;
+%    clear imagelist;
+%    clear img_stack;
+
+    [~,nameStr,~] = fileparts( handles.filename) ;
+
+    [fn, savepathname]= uiputfile('*.mat', 'choose file to save', strcat ...
+        (nameStr, '_',num2str(handles.istart),'-',num2str(handles.iend),'.mat'));
+
+    if length(fn) > 1
+        fnamemat = strcat(savepathname,fn);
+        save(fnamemat,'-v7.3');
+    end
+    
+    saveas(handles.figureH, strcat(nameStr, '_',num2str(handles.istart),'-',num2str(handles.iend),'.fig'));
+end
 
 % --------------------------------------------------------------------
 function ImportMenuItem_Callback(hObject, eventdata, handles)
@@ -497,7 +514,7 @@ if ~isempty(handles.signal)
     
     handles.normalized_signal = nm_signal(handles.signal, handles.odor_seq);
     
-    curve_plot(handles.normalized_signal, handles.image_times, handles.odor_seq);
+    [~, handles.figureH]=curve_plot( handles.normalized_signal, handles.image_times, handles.odor_seq);
 end
 
 guidata(hObject,handles);

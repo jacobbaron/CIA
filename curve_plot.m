@@ -1,4 +1,4 @@
-function leg=curve_plot(signal, image_times, odor_seq,varargin)
+function [leg, fHandle]=curve_plot(signal, image_times, odor_seq,varargin)
 
 global neuron_list;
 %global odor_list odor_concentration_list odor_colormap;
@@ -21,7 +21,7 @@ colorset = varycolor(length(signal));
 
 
 %% plot curves
-figure
+fHandle = figure;
 for i =1:length(signal)
 %     smooth_signal = smooth(signal{i},30);
 %     plot(image_times, smooth_signal,'Color', colorset(i,:));

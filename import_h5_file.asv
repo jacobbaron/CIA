@@ -1,4 +1,4 @@
-function [img_data]=import_h5_file(import_all,filename,filename_log)
+function [img_data]=import_h2_files(import_all,filename,filename_log)
 %import_all=1 if you want to import all data, otherwise, it will ask for
 %you to specify amount of data
 
@@ -8,35 +8,24 @@ global odor_list odor_concentration_list odor_colormap;
 
 %%
 
-    p1 = mfilename;
-    p2 = mfilename('fullpath');
-    currentFolder = strrep(p2, p1, '');
+    p1 = mfilename
+    p2 = mfilename('fullpath')
+    currentFolder = strrep(p2, p1, '')
 
 path = [currentFolder, 'data\'];
-load('odor_inf.mat');
+load([path, 'odor_inf'], 'odor_list', 'odor_concentration_list', 'odor_colormap');
 
 addpath(pwd)
-%if no filename is specified, ask
- if ~exist('filename','var') && ~exist('filename_log','var')
-    [filename,pathname]  = uigetfile({'*.h5'});  
+if ~exist('filename','var') && ~exist('filename_log','var')
+    [filename,pathname]  = uigetfile({'*.nd2'});  
 
 %% load the log file
-    % automatically figure out the log file (.mat file)
-    logMatFileList = ListMatLogFiles( pathname );
-    filename_log = FindSingleMatLogFile(filename, logMatFileList);
-
-    % display the movie file and log file 
-    disp('----------------File Information----------------');
-    disp(['Image file: ', pathname, filename]);
-    disp(['Log file (.mat): ', pathname, filename_log]);
-
-%     disp('Choose the log file of this experiment.');
-%     [filename_log]  =  uigetfile([pathname, 'log_*']);
+    disp('Choose the log file of this experiment.');
+    [filename_log]  =  uigetfile([pathname, 'log_*']);
     
- else
-     pathname=strcat(pwd,filesep);
- end
-
+else
+    pathname=strcat(pwd,filesep);
+end
 fname_log = [pathname filename_log];
 if ~isempty(strfind(filename_log,'.txt'))
     % number of lines
@@ -84,37 +73,34 @@ end
 %% load the data
    
 fname = [pathname filename];
-
-%get metadata 
+%get  
 [piezo,volumes,lasers,t,img_idx,res,...
-    acq_start_time]=LoadImgProperties(filename);
-piezo=piezo(1:length(img_idx));
-volumes=volumes(1:length(img_idx));
-lasers=lasers(1:length(img_idx),:);
-image_times=zeros(max(volumes),1);
-for ii=1:max(volumes)
-    image_times(ii)=mean(t(volumes==ii));
-end
+    start_time]=LoadImgProperties(filename);
+image_times_idx=[find(diff(volumes));length(volumes)];
+image_times=t(ismember(img_idx,image_times_idx));
 
-which_lasers=find(any(lasers,1));
 zstack_pos=20*(piezo(volumes==1 & lasers(:,which_lasers(1))));
 zdiff_size=diff(zstack_pos);
 
-%initialize array
 img1=initialize_imgs(volumes,lasers,res,img_idx);
 x=waitbar(0,'Loading');
-% for ii=1:max(volumes) %fill up array with data
-%     waitbar(ii/max(volumes),x);
-%     img1=get_volume(fname,ii,lasers,piezo,img_idx,res,volumes,img1);
-%    
-% end
-[img1] = get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img1);
+for ii=1:max(volumes) 
+    waitbar(ii/max(volumes),x);
+    img1=get_volume(fname,ii,lasers,piezo,img_idx,res,volumes,img);
+   
+end
 close(x)
-img_stacks=cell(size(img1,5),1);
+img_stacks=cell(size(img1,5));
 for ii=1:length(img_stacks)
     img_stacks{ii}=img1(:,:,:,:,ii);
 end
+num_series=size(img1,4);
 
+acq_start_time=datetime({omeMeta.getImageAcquisitionDate(0).getValue()},...
+    'InputFormat','uuuu-MM-dd''T''HH:mm:ss');
+    
+
+    
 %% get the odor sequence
 odor_seq = getodorseq( image_times,  odor_inf, odor_conc_inf);
 
@@ -132,7 +118,7 @@ img_data.acq_start_time=acq_start_time;
 img_data.odor_start_time=odor_start_time;
 img_data.filename=fname;
 img_data.filename_log=fname_log;
-img_data.img_stack_max=cellfun(@(x)squeeze(max(x,[],3)),img_data.img_stacks,'UniformOutput',false);
+
 img_data.pixelSize=[.27,...
                     .27,...
                     zdiff_size(1)];
