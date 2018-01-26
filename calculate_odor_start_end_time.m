@@ -7,7 +7,8 @@ function [start_time, end_time]=calculate_odor_start_end_time(varargin)
         odor_seq=varargin{3};
     end
     
-    water_change_idx=find(([diff(odor_seq)~=0;0] & odor_seq==0 )| ([0;diff(odor_seq)~=0] & odor_seq==0 ));
+    water_change_idx=find(([diff(odor_seq)~=0;0] & odor_seq==0 )| ...
+        ([0;diff(odor_seq)~=0] & odor_seq==0 ));
     start_time_rel=image_times(water_change_idx(1));
     end_time_rel=image_times(water_change_idx(end));
     

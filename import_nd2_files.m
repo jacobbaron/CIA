@@ -2,25 +2,38 @@ function [img_data]=import_nd2_files(import_all,filename,filename_log)
 %import_all=1 if you want to import all data, otherwise, it will ask for
 %you to specify amount of data
 
+global  odor_seq  image_times;
+global odor_list odor_concentration_list odor_colormap;
 
+%%
     p1 = mfilename
     p2 = mfilename('fullpath')
     currentFolder = strrep(p2, p1, '')
 
 path = [currentFolder, 'data\'];
-load([path, 'odor_inf'], 'odor_list', 'odor_concentration_list', 'odor_colormap');
+load('odor_inf.mat');
 
 addpath(pwd)
 %if no filename is specified, ask
-if ~exist('filename','var') && ~exist('filename_log','var')
+if ~exist('filename','var')
     [filename,pathname]  = uigetfile({'*.nd2'});  
-
-%% load the log file
-    disp('Choose the log file of this experiment.');
-    [filename_log]  =  uigetfile([pathname, 'log_*']);
-    
 else
     pathname=strcat(pwd,filesep);
+end
+if ~exist('filename_log','var')
+%% load the log file
+     % automatically figure out the log file (.mat file)
+    logMatFileList = ListMatLogFiles( pathname );
+    filename_log = FindSingleMatLogFile(filename, logMatFileList);
+
+    % display the movie file and log file 
+    disp('----------------File Information----------------');
+    disp(['Image file: ', pathname, filename]);
+    disp(['Log file (.mat): ', pathname, filename_log]);
+    
+%     disp('Choose the log file of this experiment.');
+%     [filename_log]  =  uigetfile([pathname, 'log_*']);
+    
 end
 fname_log = [pathname filename_log];
 if ~isempty(strfind(filename_log,'.txt'))
@@ -52,18 +65,60 @@ if ~isempty(strfind(filename_log,'.txt'))
     odor_conc_inf(:,3)=odor_inf(:,2);
 else
     load(fname_log);
-    odors_used=['water';log_data.odor_list];
-    conc_used=[' ';log_data.conc_list];
-    odor_inf(:,1)=cellfun(@(x,y)strtrim(sprintf('%s %s',x,y)),...
-        conc_used(log_data.sequence_channel'),odors_used(log_data.sequence_channel'),...
-        'UniformOutput',false);
-    odor_inf(:,2)=num2cell(log_data.sequence_period');
-    neuron_idx=strfind(filename,'_run');
-    neuron_type=filename(1:neuron_idx);
-    
-    odor_conc_inf(:,1)=conc_used(log_data.sequence_channel');
-    odor_conc_inf(:,2)=odors_used(log_data.sequence_channel');
-    odor_conc_inf(:,3)=odor_inf(:,2);
+    if ~isfield(log_data, 'mixAPPFlag')
+        odors_used=['water';log_data.odor_list];
+        conc_used=[' ';log_data.conc_list];
+        odor_inf(:,1)=cellfun(@(x,y)strtrim(sprintf('%s %s',x,y)),...
+            conc_used(log_data.sequence_channel'),odors_used(log_data.sequence_channel'),...
+            'UniformOutput',false);
+        odor_inf(:,2)=num2cell(log_data.sequence_period');
+        neuron_idx=strfind(filename,'_run');
+        neuron_type=filename(1:neuron_idx);
+
+        odor_conc_inf(:,1)=conc_used(log_data.sequence_channel');
+        odor_conc_inf(:,2)=odors_used(log_data.sequence_channel');
+        odor_conc_inf(:,3)=odor_inf(:,2);
+    else 
+
+        channel_seq = {'A5', 'A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'};
+        for i = 1:length(log_data.period_pulse)
+            odor_inf{2*i-1,1} = 'water';  %water
+            
+            myIndexA = find(strcmp(channel_seq, log_data.mixA{i}));
+            myIndexB = find(strcmp(channel_seq, log_data.mixB{i}));
+            
+            if strcmp(log_data.odor_list{myIndexA}, 'water')
+                str1 = sprintf('%.1f %s %s', log_data.ratioA(i), log_data.odor_list{myIndexA});
+            else
+                str1 = sprintf('%.1f %s %s', log_data.ratioA(i), log_data.conc_list{myIndexA}, log_data.odor_list{myIndexA});
+            end
+            
+            if strcmp(log_data.odor_list{myIndexB}, 'water')
+                str2 = sprintf('%.1f %s %s', 1-log_data.ratioA(i), log_data.odor_list{myIndexB});
+            else
+                str2 = sprintf('%.1f %s %s', 1-log_data.ratioA(i), log_data.conc_list{myIndexB}, log_data.odor_list{myIndexB});
+            end
+            
+            odor_inf(2*i, 1)=cellfun(@(x,y) strtrim(sprintf('%s %s',x,y)), mat2cell(str1, 1) , mat2cell(str2, 1), 'UniformOutput',false);
+
+            odor_inf(2*i-1,2) = num2cell(log_data.period_water(i)'); %water
+            odor_inf(2*i,2) = num2cell(log_data.period_pulse(i)');   %odor
+        
+        end
+        odor_inf(2*i+1,2) = num2cell(log_data.period_water(i+1)'); %water
+        odor_inf{2*i+1,1} = 'water';  %water
+        
+        neuron_idx=strfind(filename,'_run');
+        neuron_type=filename(1:neuron_idx);
+
+        for i = 1:2*length(log_data.period_pulse)+1
+            odor_conc_inf{i,1} = ' ';
+        end        
+        odor_conc_inf(:,2) = odor_inf(:,1);
+        odor_conc_inf(:,3) = odor_inf(:,2);
+        
+    end
+        
 end
 %%
 
@@ -249,6 +304,9 @@ img_data.acq_start_time=acq_start_time;
 img_data.odor_start_time=odor_start_time;
 img_data.filename=fname;
 img_data.filename_log=fname_log;
+
+img_data.img_stack_max=cellfun(@(x)squeeze(max(x,[],3)),img_data.img_stacks,'UniformOutput',false);
+
 img_data.metadata=metadata;
 img_data.omemeta=omeMeta;
 if size(img_data.img_stacks{1},3)>1
@@ -259,9 +317,9 @@ else
     img_data.pixelSize=[omeMeta.getPixelsPhysicalSizeX(0).getValue(),...
                         omeMeta.getPixelsPhysicalSizeY(0).getValue()];
 end
-if exist('log_data','var')
-    img_data.which_side=log_data.which_side;
-    img_data.annotations=log_data.annotations;
-end
+% if exist('log_data','var')
+%     img_data.which_side=log_data.which_side;
+%     img_data.annotations=log_data.annotations;
+% end
 
 return;

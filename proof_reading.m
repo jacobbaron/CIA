@@ -77,9 +77,9 @@ set(handles.figure1, 'Position', [400 400 width height+45]);
 set(handles.slider1, 'Position', [0 2 width 18]);
 axes(handles.axes1);
 handles.low=0;
-handles.high=2500;
-handles.tracking_threshold=300;
-handles.search_radius = 10;
+handles.high=500;
+handles.tracking_threshold = 0;
+handles.search_radius = 20;
 img=imagesc(handles.img_stack(:,:,handles.istart),[handles.low handles.high]);
 colormap(gray);
 set(handles.axes1, ...
@@ -303,12 +303,14 @@ if length(questdlg('Save this data? Make sure you have exported everything! '))=
     [fn, savepathname]= uiputfile('*.mat', 'choose file to save', strcat ...
         (nameStr, '_',num2str(handles.istart),'-',num2str(handles.iend),'.mat'));
 
-    if length(fn) > 1
-        fnamemat = strcat(savepathname,fn);
-        save(fnamemat,'-v7.3');
+    if length(questdlg('Save this data? Make sure you have exported everything! '))==3
+        if length(fn) > 1
+            fnamemat = strcat(savepathname,fn);
+            save(fnamemat,'-v7.3');
+%             save(fnamemat, '-regexp', '^(?!(img_data)$).')
+        end
+        saveas(handles.figureH, strcat(nameStr, '_',num2str(handles.istart),'-',num2str(handles.iend),'.fig'));
     end
-    
-    saveas(handles.figureH, strcat(nameStr, '_',num2str(handles.istart),'-',num2str(handles.iend),'.fig'));
 end
 
 % --------------------------------------------------------------------
