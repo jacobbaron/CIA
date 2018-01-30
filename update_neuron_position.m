@@ -11,18 +11,9 @@ else
     xmin=max(round(pre_position(1)-radius),1);
     xmax=min(round(pre_position(1)+radius),width);
     h = fspecial('gaussian',[3,3],3);  
-    c_filtered=imfilter(img(ymin:ymax,xmin:xmax),h, 'replicate');
+    c_filtered=imfilter(img(ymin:ymax,xmin:xmax),h);
     %threshold and find the local maxima
-    %% changed by G.Si 20170808
-    if threshold ~= 0 
-        bw = imextendedmax(c_filtered,threshold); 
-    else
-        img_c_filtered = mat2gray(c_filtered, [min(c_filtered(:)) max(c_filtered(:))]);
-        temp = sort(img_c_filtered(:),'descend');
-        newThresh = temp(100);
-%         bw = imextendedmax(c_filtered,newThresh); 
-        bw = im2bw(img_c_filtered, newThresh);
-    end
+    bw = imextendedmax(c_filtered,threshold); 
     L=logical(bw);
     s=regionprops(L,'Centroid');
     %putative neuronal positions
