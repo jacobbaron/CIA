@@ -357,8 +357,10 @@ function handles=max_inten_proj(handles)
         img_size(4),size(handles.Img,5),'uint16') ; %3rd dimension is time
     handles.TimeAxis.YTick=[];
     handles.Img_max_proj(1:img_size(1),1:img_size(2),:,:) = handles.img_xy;
-    handles.Img_max_proj(img_size(1)+2:end, 1:img_size(2),:,:) = handles.img_xz;
-    handles.Img_max_proj(1:img_size(1), img_size(2)+2:end,:,:) = handles.img_yz;
+    if img_size(3)>1
+        handles.Img_max_proj(img_size(1)+2:end, 1:img_size(2),:,:) = handles.img_xz;
+        handles.Img_max_proj(1:img_size(1), img_size(2)+2:end,:,:) = handles.img_yz;
+    end
     
     
     function handles = reshape_max_inten(handles)
