@@ -5,7 +5,7 @@ function normalized_signal = nm_signal( signal, odor_seq )
 %f0_left  = -10;
 %f0_right = -2;
 
-index = find(odor_seq.odorSeqStep, 1 );
+index = find(odor_seq, 1 );
 
 % left  = max(1, index+f0_left);
 % right = max(1, index+f0_right);
