@@ -22,8 +22,8 @@ addpath(pwd)
 
 %% load the log file
     % automatically figure out the log file (.mat file)
-    logMatFileList = ListMatLogFiles( pathname );
-    filename_log = FindSingleMatLogFile(filename, logMatFileList);
+    logMatFileList = ListH5LogFiles( pathname );
+    filename_log = FindSingleH5LogFile(filename, logMatFileList);
 
     % display the movie file and log file 
     disp('----------------File Information----------------');
