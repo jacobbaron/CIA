@@ -124,6 +124,7 @@ odor_seq = getodorseq( image_times,  odor_inf, odor_conc_inf);
 
 img_data=struct;
 img_data.img_stacks=img_stacks;
+img_data.odor_inf = odor_inf;
 img_data.t=image_times;
 img_data.neuron_type=neuron_type;
 img_data.odor_seq=odor_seq;

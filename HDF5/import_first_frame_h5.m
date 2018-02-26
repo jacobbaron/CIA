@@ -13,7 +13,7 @@ end
 which_lasers=find(any(lasers,1));
 zstack_pos=20*(piezo(volumes==1 & lasers(:,which_lasers(1))));
 zdiff_size=diff(zstack_pos);
-img = initialize_imgs(volumes,lasers,res,img_idx,1);
+img = initialize_imgs(volumes,lasers,res,img_idx);
 img = get_volume(fname,1,lasers,piezo,img_idx,res,volumes,img);
 img = flip(flip(permute(img,[2,1,3,4,5]),1),3);
 imgSize = size(img);

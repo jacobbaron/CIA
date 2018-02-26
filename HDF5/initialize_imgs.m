@@ -7,7 +7,7 @@ function [img]=initialize_imgs(volumes,lasers,res,img_idx)
         zdepth(ii)=length(find(lasers(volumes==1,ii)));
     end
     
-    img=int16(zeros(res(1),res(2),max(zdepth),length(unique(volumes(volumes>0))),num_lasers));
+    img=zeros(res(1),res(2),max(zdepth),length(unique(volumes(volumes>0))),num_lasers,'uint16');
     
     
     
