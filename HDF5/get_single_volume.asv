@@ -5,7 +5,8 @@ function [greenImg,redImg]=get_single_volume(fname,volumes,lasers,piezo,img_idx,
     %if all(vol_mem(:)==0) %data not yet loaded
         [~,~,int_piezo]=unique(piezo);
         %volumes_data=volumes(img_idx);
-        
+        d1 = res(1);
+        d2 = res(2);
         frames=find(volumes==volume);
        
         offset=prod(res)*(frames-1)+1;
@@ -17,8 +18,8 @@ function [greenImg,redImg]=get_single_volume(fname,volumes,lasers,piezo,img_idx,
         unique_lasers=find(any(lasers,1));
         
         data3d=reshape(data,res(1),res(2),length(frames));       
-        redImg = zeros(res(1),res(2),d3,'uint16');
-        greenImg = zeros(res(1),res(2),d3,'uint16');
+        redImg = zeros(res(1),res(2),length(find(lasers(frames,2))),'uint16');
+        greenImg = zeros(res(1),res(2),length(find(lasers(frames,2))),'uint16');
         for ii=1:length(unique_lasers)
             laser_id=find(lasers(frames,unique_lasers(ii)));
             [~,idx]=sort(piezo(frames(laser_id)));
