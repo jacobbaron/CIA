@@ -37,7 +37,7 @@ addpath(pwd)
      pathname=strcat(pwd,filesep);
  end
 
-fname_log = [pathname filename_log];
+fname_log = [filename_log];
 if ~isempty(strfind(filename_log,'.txt'))
     % number of lines
     fid = fopen(fname_log);
