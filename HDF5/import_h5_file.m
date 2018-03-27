@@ -1,4 +1,4 @@
-function [img_data]=import_h5_file(import_all,filename,filename_log)
+function [img_data]=import_h5_file(import_all,filename,filename_log,img_data)
 %import_all=1 if you want to import all data, otherwise, it will ask for
 %you to specify amount of data
 
@@ -37,7 +37,7 @@ addpath(pwd)
      pathname=strcat(pwd,filesep);
  end
 
-fname_log = [pathname filename_log];
+fname_log = [filename_log];
 if ~isempty(strfind(filename_log,'.txt'))
     % number of lines
     fid = fopen(fname_log);
@@ -122,7 +122,7 @@ odor_seq = getodorseq( image_times,  odor_inf, odor_conc_inf);
 
 %% save output data
 
-img_data=struct;
+
 img_data.img_stacks=img_stacks;
 img_data.odor_inf = odor_inf;
 img_data.t=image_times;

@@ -33,7 +33,7 @@ maxImgRGB = zeros(d1+d3It,d2+d3It,3,length(image_times));
 %%
 h = waitbar(0,'Loading...');
 for ii=1:T
-    [greenImg,redImg]=get_single_volume(fNameIn,volumes,lasers,piezo,img_idx,res,ii);
+    [greenImg,redImg]=get_single_volume(fNameIn,volumes,lasers,piezo,img_idx,res,d3,ii);
     maxImgRGB(:,:,:,ii) = make_max_img_RGB(redImg,greenImg,pixelSize,0);
     waitbar(ii/max(volumes))
 end
