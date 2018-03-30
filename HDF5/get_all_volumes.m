@@ -16,7 +16,7 @@ function [img,time]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img
 
         unique_lasers=find(any(lasers,1));
         
-        data3d=reshape(data,res(1),res(2),length(img_idx));
+        data=reshape(data,res(1),res(2),length(img_idx));
         
         which_lasers=zeros(size(lasers,1),1);
         for ii=1:length(lasers)
@@ -27,12 +27,12 @@ function [img,time]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img
         end
         
         [~,~,which_laser_idx]=unique(which_lasers(use_frames));
-        data3d_use=data3d(:,:,use_frames);
+        data=data(:,:,use_frames);
         int_piezo_use=int_piezo(use_frames);
         volumes=volumes(use_frames);
         for ii=1:length(which_laser_idx)
             img(:,:,int_piezo_use(ii),volumes(ii),which_laser_idx(ii))=...
-                data3d_use(:,:,ii);
+                data(:,:,ii);
         end
         unique_volumes=unique(volumes(volumes>0));
         for ii=1:length(unique_volumes)
