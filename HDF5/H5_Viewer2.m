@@ -53,16 +53,25 @@ function H5_Viewer2_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to H5_Viewer2 (see VARARGIN)
 
 % Choose default command line output for H5_Viewer2
-handles.output = hObject;
-[filename,pathname]  = uigetfile({'*.h5'});  
-fname=fullfile(pathname,filename);
-handles.Title.String=filename;
-[piezo,volumes,lasers,t,img_idx,res]=LoadImgProperties(fname);
-handles.Img=initialize_imgs(volumes,lasers,res);
-[handles.Img,handles.T_vols]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,handles.Img);
+if isempty(varargin)
+    handles.output = hObject;
+    [filename,pathname]  = uigetfile({'*.h5'});  
+    fname=fullfile(pathname,filename);
+    handles.Title.String=filename;
+    [piezo,volumes,lasers,t,img_idx,res]=LoadImgProperties(fname);
+    handles.Img=initialize_imgs(volumes,lasers,res);
+    [handles.Img,handles.T_vols]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,handles.Img);
+    
+else
+    handles.Img = varargin{1};
+    handles.T_vols = varargin{2};
+    lasers = varargin{3};
+    
+end
+handles.which_lasers=fliplr(find(fliplr(any(lasers,1))));
 %handles.Img=flip(permute(handles.Img,[2,1,3,4,5]),1);
 handles.Img_full=handles.Img;
-handles.which_lasers=fliplr(find(fliplr(any(lasers,1))));
+
 %handles.Img=double(handles.Img);
 %handles.rgb=zeros([res(1),res(2),size(handles.Img,3),size(handles.Img,4),3]);
 handles.TimeSlider.Min=1;
@@ -224,7 +233,7 @@ function varargout = H5_Viewer2_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+%varargout{1} = handles.output;
 
 
 % --- Executes on slider movement.
@@ -389,7 +398,7 @@ function handles = scale_img_values(handles)
     handles.scale_rgb_proj = ones(proj_size(1),proj_size(2),3);
     %handles.rgb_disp=handles.rgb;
     for ii=1:length(handles.which_lasers)    
-        handles.scale_rgb(handles.which_lasers(ii))=max(reshape(handles.Img(:,:,:,handles.Z,ii),[],1));
+        handles.scale_rgb(handles.which_lasers(ii))=max(reshape(handles.Img(:,:,handles.Z,:,ii),[],1));
         handles.scale_rgb_slice(:,:,handles.which_lasers(ii)) = handles.scale_rgb(handles.which_lasers(ii));
         handles.scale_rgb_proj(:,:,handles.which_lasers(ii)) = handles.scale_rgb(handles.which_lasers(ii));
         %handles.rgb_disp=handles.rgb(:,:,:,:,handles.which_lasers(ii))/handles.scale_rgb(ii);

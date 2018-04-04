@@ -1,6 +1,6 @@
-function [img,time]=get_all_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img)
+function [img,time]=get_some_volumes(fname,lasers,piezo,img_idx,res,volumes,t,img,startVol,count)
     
-        
+        % doesn"t work!!!
         [~,~,int_piezo]=unique(piezo);
         %volumes=volumes(img_idx);
         %piezo = piezo(img_idx);
