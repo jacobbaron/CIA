@@ -25,7 +25,7 @@ pixelSize=[.27,...
                     zdiff_size(1)];
 d1 = res(1);
 d2 = res(2);
-d3 = length(zstack_pos);
+d3 = length(unique(piezo));
 T = length(image_times);
 x2z = pixelSize(3)/pixelSize(2);
 d3It = round(d3*x2z);
