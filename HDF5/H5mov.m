@@ -38,10 +38,10 @@ classdef H5mov < handle
                [mov5D(:,:,:,ii,1),mov5D(:,:,:,ii,2)] = get_single_volume(...
                    obj.filename,obj.meta.volumes,obj.meta.lasers,obj.meta.piezo,...
                    obj.meta.img_idx,obj.meta.res,obj.d3,fStart+ii-1);
-               waitbar(ii/length(tCount),h);
+               waitbar(ii/tCount,h);
             end
             close(h);
-            H5_Viewer2(mov5D,obj.t(tStart:tStart+tCount-1),obj.meta.lasers);
+            H5_Viewer2(mov5D,obj.t(fStart:fStart+fCount-1),obj.meta.lasers);
             
         end
         function obj = load_odor_seq(obj)            
