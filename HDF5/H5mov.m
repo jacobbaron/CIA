@@ -8,6 +8,7 @@ classdef H5mov < handle
         acq_start_time
         filename
         filename_log
+        path
         img_stack_max
         pixelSize
         which_side
@@ -26,6 +27,9 @@ classdef H5mov < handle
             obj = import_h5_file(1,fname,fnamelog,obj);
         end
         function obj = loadSome(obj,tStart,tCount)
+            if isempty(obj.filename)
+                obj = choose(obj);obj.load_movie_metadata;obj.load_odor_seq;
+            end
             fStart = find(obj.t>tStart,1);
             fEnd = find(obj.t>(tStart+tCount),1);
             fCount = fEnd-fStart;
@@ -36,9 +40,9 @@ classdef H5mov < handle
             h = waitbar(0,'Loading...');
             for ii=1:fCount
                [mov5D(:,:,:,ii,1),mov5D(:,:,:,ii,2)] = get_single_volume(...
-                   obj.filename,obj.meta.volumes,obj.meta.lasers,obj.meta.piezo,...
+                   fullfile(obj.path,obj.filename),obj.meta.volumes,obj.meta.lasers,obj.meta.piezo,...
                    obj.meta.img_idx,obj.meta.res,obj.d3,fStart+ii-1);
-               waitbar(ii/tCount,h);
+               waitbar(ii/fCount,h);
             end
             close(h);
             H5_Viewer2(mov5D,obj.t(fStart:fStart+fCount-1),obj.meta.lasers);
@@ -52,7 +56,7 @@ classdef H5mov < handle
            odorStrs = cellfun(@(x,y)[x,' ',y],conc2choose,odors2choose,'UniformOutput',false);
            odorStarts = seqStarts(notWater);
         end
-        function obj = load_odor_seq(obj)            
+        function load_odor_seq(obj)            
             if contains(obj.filename_log,'.txt')
                 % number of lines
                 fid = fopen(obj.filename_log);
@@ -81,7 +85,7 @@ classdef H5mov < handle
                 obj.odor_conc_inf(~not_water,2)=cellfun(@(x)x{1},obj.odor_inf(~not_water,1),'UniformOutput',false);
                 obj.odor_conc_inf(:,3)=obj.odor_inf(:,2);
             else
-                load(obj.filename_log);
+                load(fullfile(obj.path,obj.filename_log));
                 odors_used=['water';log_data.odor_list];
                 conc_used=[' ';log_data.conc_list];
                 odor_inf = cell(size(log_data.sequence_period'));
@@ -101,9 +105,9 @@ classdef H5mov < handle
                 obj.odor_inf = load('odor_inf.mat');
             end
         end
-        function obj = choose(obj)
-            [flist,path] = uigetfile('*.h5','MultiSelect','on');
-            logMatFileList = ListMatLogFiles( path );
+        function obj = choose(varargin)
+            [flist,pth] = uigetfile('*.h5','MultiSelect','on');
+            logMatFileList = ListMatLogFiles( pth);
             if ~iscell(flist)
                 flist = {flist};
             end
@@ -113,20 +117,22 @@ classdef H5mov < handle
             for i = 1:length(flist)
                 obj(i).filename = flist{i};
                 obj(i).filename_log = f_list_log{i};
+                obj(i).path = pth;
             end
         end
         function obj = H5mov(varargin)
             if nargin==2
                 obj.filename = varargin{1};
                 obj.filename_log = varargin{2};
+                obj.path = which(obj.filename);
             elseif nargin==1
                obj = H5mov(varargin{1}); 
             end
         end
-        function obj = load_movie_metadata(obj)
+        function load_movie_metadata(obj)
                         %get metadata 
             [obj.meta.piezo,obj.meta.volumes,obj.meta.lasers,obj.meta.tframe,obj.meta.img_idx,obj.meta.res,...
-                obj.acq_start_time]=LoadImgProperties(obj.filename);
+                obj.acq_start_time]=LoadImgProperties(fullfile(obj.path,obj.filename));
             obj.meta.piezo=obj.meta.piezo(1:length(obj.meta.img_idx));
             obj.meta.volumes=obj.meta.volumes(1:length(obj.meta.img_idx));
             obj.meta.lasers=obj.meta.lasers(1:length(obj.meta.img_idx),:);
