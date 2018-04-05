@@ -44,6 +44,14 @@ classdef H5mov < handle
             H5_Viewer2(mov5D,obj.t(fStart:fStart+fCount-1),obj.meta.lasers);
             
         end
+        function obj = playOdorResponse(obj)
+            seqStarts = cumsum(cell2mat(obj.odor_conc_inf(:,3)));
+            notWater = ~strcmp(obj.odor_conc_inf(:,2),'water');
+           odors2choose = obj.odor_conc_inf(notWater,2);
+           conc2choose = obj.odor_conc_inf(notWater,1);
+           odorStrs = cellfun(@(x,y)[x,' ',y],conc2choose,odors2choose,'UniformOutput',false);
+           odorStarts = seqStarts(notWater);
+        end
         function obj = load_odor_seq(obj)            
             if contains(obj.filename_log,'.txt')
                 % number of lines
