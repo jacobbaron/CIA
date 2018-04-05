@@ -25,7 +25,7 @@ function varargout = H5_Viewer2(varargin)
 % Last Modified by GUIDE v2.5 03-May-2017 11:29:03
 
 % Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
+gui_Singleton = 0;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
                    'gui_OpeningFcn', @H5_Viewer2_OpeningFcn, ...
@@ -66,6 +66,7 @@ else
     handles.Img = varargin{1};
     handles.T_vols = varargin{2};
     lasers = varargin{3};
+    handles.Title.String = strrep(varargin{4},'_',' ');
     
 end
 handles.which_lasers=fliplr(find(fliplr(any(lasers,1))));

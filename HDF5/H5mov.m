@@ -26,9 +26,12 @@ classdef H5mov < handle
             fnamelog = f_list_log{1};
             obj = import_h5_file(1,fname,fnamelog,obj);
         end
-        function obj = loadSome(obj,tStart,tCount)
+        function obj = loadSome(obj,tStart,tCount,str)
             if isempty(obj.filename)
                 obj = choose(obj);obj.load_movie_metadata;obj.load_odor_seq;
+            end
+            if ~exist('str','var')
+                str = obj.filename;
             end
             fStart = find(obj.t>tStart,1);
             fEnd = find(obj.t>(tStart+tCount),1);
@@ -45,16 +48,22 @@ classdef H5mov < handle
                waitbar(ii/fCount,h);
             end
             close(h);
-            H5_Viewer2(mov5D,obj.t(fStart:fStart+fCount-1),obj.meta.lasers);
+            H5_Viewer2(mov5D,obj.t(fStart:fStart+fCount-1),obj.meta.lasers,...
+                str);
             
         end
         function obj = playOdorResponse(obj)
-            seqStarts = cumsum(cell2mat(obj.odor_conc_inf(:,3)));
+            if isempty(obj.filename)
+                obj = choose(obj);obj.load_movie_metadata;obj.load_odor_seq;
+            end
+            seqStarts = cumsum([0;cell2mat(obj.odor_conc_inf(1:end-1,3))]);
             notWater = ~strcmp(obj.odor_conc_inf(:,2),'water');
            odors2choose = obj.odor_conc_inf(notWater,2);
            conc2choose = obj.odor_conc_inf(notWater,1);
            odorStrs = cellfun(@(x,y)[x,' ',y],conc2choose,odors2choose,'UniformOutput',false);
            odorStarts = seqStarts(notWater);
+           [odorIdx,preTime,postTime] = select_odor_starts(odorStrs);
+           obj.loadSome(odorStarts(odorIdx)-preTime,postTime+preTime,sprintf('%s, %s',obj.filename,odorStrs{odorIdx}));
         end
         function load_odor_seq(obj)            
             if contains(obj.filename_log,'.txt')
