@@ -102,8 +102,8 @@ classdef H5mov < handle
             end
         end
         function obj = choose(obj)
-            flist = uigetfile('*.h5','MultiSelect','on');
-            logMatFileList = ListMatLogFiles( pwd );
+            [flist,path] = uigetfile('*.h5','MultiSelect','on');
+            logMatFileList = ListMatLogFiles( path );
             f_list_log = FindBatchMatLogFile(flist, logMatFileList);
 
             if ~iscell(flist)
@@ -121,7 +121,7 @@ classdef H5mov < handle
             if nargin==2
                 obj.filename = varargin{1};
                 obj.filename_log = varargin{2};
-            elseif narargin==1
+            elseif nargin==1
                obj = H5mov(varargin{1}); 
             end
         end
