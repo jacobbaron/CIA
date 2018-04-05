@@ -1,4 +1,5 @@
 function pairedLogFileList = FindBatchMatLogFile(movieFileList, logMatFileList)
+
     % show a wait bar for log file searching
     h = waitbar(0, 'Paring the movie files and log files.');
 
