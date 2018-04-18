@@ -1,11 +1,10 @@
 function logFileName = FindSingleMatLogFile(movieFileName, logMatFileList)
 
     %figure out the name domain and index domain of the movie file name
-    [~,movieFileName,ext] = fileparts(movieFileName);
     markIndMovie1 = strfind(movieFileName, 'run');
-    %markIndMovie2 = strfind(movieFileName, '.');
+    markIndMovie2 = strfind(movieFileName, '.');
     nameDomainMovie = movieFileName(1 : markIndMovie1 - 1);
-    indDomainMovie = movieFileName(markIndMovie1 + 3: end);
+    indDomainMovie = movieFileName(markIndMovie1 + 3: markIndMovie2-1);
 
     %Frstly check the index domain, if there is only one index, use the one
     %found, if there are multiple check if the name domain match
