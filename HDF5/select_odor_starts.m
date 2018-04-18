@@ -1,6 +1,8 @@
 function [odorIdx,preTime,postTime] = select_odor_starts(odorStrs)
 
-f = figure('Units','normalized','Position', [.25 .25 .28 .35]);
+f = figure('Position', [100 100 527 407]);
+x = get(0);
+
 lbox = uicontrol('Style','listbox','Position',[9 9 350 350],'String',odorStrs);
 preTimeBox = uicontrol('Style','edit','Position',[375 350,35,25],'String','5');
 postTimeBox = uicontrol('Style','edit','Position',[375 295,35,25],'String','5');

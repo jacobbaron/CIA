@@ -114,7 +114,7 @@ img_stacks=cell(size(img1,5),1);
 for ii=1:length(img_stacks)
     img_stacks{ii}=img1(:,:,:,:,ii);
 end
-
+clear img1
 %% get the odor sequence
 odor_seq = getodorseq( image_times,  odor_inf, odor_conc_inf);
 
