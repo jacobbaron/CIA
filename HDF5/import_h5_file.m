@@ -37,7 +37,7 @@ addpath(pwd)
  end
 
 fname_log = filename_log;
-odor_seq = import_odor_seq_lf(path, filename);
+odor_seq = import_odor_seq_lf(pathname, fname_log);
 %%
 
 if exist('pathname', 'var')
