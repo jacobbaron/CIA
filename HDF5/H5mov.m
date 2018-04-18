@@ -1,10 +1,8 @@
 classdef H5mov < handle
     properties
-        odor_inf
         t
         neuron_type
-        odor_seq
-        odor_conc_inf
+        odor_seq        
         acq_start_time
         filename
         filename_log
@@ -12,20 +10,25 @@ classdef H5mov < handle
         img_stack_max
         pixelSize
         which_side
-        annotations 
+        annotations
+        label
         d1
         d2
         d3
         T
         meta = struct;
     end
+    properties (SetAccess = private, Hidden = true)
+        odor_conc_inf
+        odor_inf
+    end
     methods
-        function obj = loadAll(obj,fname)
-            logMatFileList = ListMatLogFiles( pwd );
-            f_list_log = FindBatchMatLogFile({fname}, logMatFileList);
-            fnamelog = f_list_log{1};
-            obj = import_h5_file(1,fname,fnamelog,obj);
-        end
+%         function obj = loadAll(obj,fname)
+%             logMatFileList = ListMatLogFiles( pwd );
+%             f_list_log = FindBatchMatLogFile({fname}, logMatFileList);
+%             fnamelog = f_list_log{1};
+%             %obj = import_h5_file(1,fname,fnamelog,obj);
+%         end
         function obj = loadSome(obj,tStart,tCount,str)
             if isempty(obj.filename)
                 obj = choose(obj);obj.load_movie_metadata;obj.load_odor_seq;
@@ -66,53 +69,13 @@ classdef H5mov < handle
            obj.loadSome(odorStarts(odorIdx)-preTime,postTime+preTime,sprintf('%s, %s',obj.filename,odorStrs{odorIdx}));
         end
         function load_odor_seq(obj)            
-            if contains(obj.filename_log,'.txt')
-                % number of lines
-                fid = fopen(obj.filename_log);
-                allText = textscan(fid,'%s','delimiter','\n');
-                fclose(fid);
-
-                % strain name
-                numberOfLines = length(allText{1});
-                obj.neuron_type = allText{1,1}{1,1};
-                
-                % the odor information
-                num_ = 3;
-                obj.odor_inf = cell(numberOfLines-num_, 2);
-                fmt='%s\t %d\t';
-                for i = 1:numberOfLines-num_
-                    obj.odor_inf(i, :) = textscan(allText{1,1}{i+num_,1}, ...
-                        fmt, 'Delimiter','\t');
-                end
-                sp=cellfun(@(x)strfind(x,' '),obj.odor_inf(:,1));
-                not_water=cellfun(@(x)~isempty(x),sp);
-                obj.odor_conc_inf=cell(size(obj.odor_inf,1),3);
-                obj.odor_conc_inf(not_water,1)=cellfun(@(x,y)x{1}(1:y(1)-1),obj.odor_inf(not_water,1),sp(not_water),...
-                    'UniformOutput',false);
-                obj.odor_conc_inf(not_water,2)=cellfun(@(x,y)x{1}(y(1)+1:end),obj.odor_inf(not_water,1),sp(not_water),...
-                    'UniformOutput',false);
-                obj.odor_conc_inf(~not_water,2)=cellfun(@(x)x{1},obj.odor_inf(~not_water,1),'UniformOutput',false);
-                obj.odor_conc_inf(:,3)=obj.odor_inf(:,2);
+            
+            if contains(obj.filename_log,'h5l')
+                obj.odor_seq = odor_seq_multimix;                
             else
-                load(fullfile(obj.path,obj.filename_log));
-                odors_used=['water';log_data.odor_list];
-                conc_used=[' ';log_data.conc_list];
-                odor_inf = cell(size(log_data.sequence_period'));
-                odor_inf(:,1)=cellfun(@(x,y)strtrim(sprintf('%s %s',x,y)),...
-                    conc_used(log_data.sequence_channel'),odors_used(log_data.sequence_channel'),...
-                    'UniformOutput',false);
-                odor_inf(:,2)=num2cell(log_data.sequence_period');
-                %neuron_idx=strfind(filename,'_run');
-                %neuron_type=filename(1:neuron_idx);
-                obj.odor_conc_inf = cell(length(odor_inf),3);
-                obj.odor_conc_inf(:,1)=conc_used(log_data.sequence_channel');
-                obj.odor_conc_inf(:,2)=odors_used(log_data.sequence_channel');
-                obj.odor_conc_inf(:,3)=odor_inf(:,2);
-                obj.which_side = log_data.which_side;
-                obj.annotations = log_data.annotations;
-                check_for_new_odors(obj.odor_conc_inf);
-                obj.odor_inf = load('odor_inf.mat');
+                obj.odor_seq = odor_seq_trad;                
             end
+            obj.odor_seq = load_odor_seq(obj.odor_seq,obj.path,obj.filename_log);
         end
         function obj = choose(varargin)
             [flist,pth] = uigetfile('*.h5','MultiSelect','on');
@@ -133,7 +96,7 @@ classdef H5mov < handle
             if nargin==2
                 obj.filename = varargin{1};
                 obj.filename_log = varargin{2};
-                obj.path = which(obj.filename);
+                obj.path = fileparts(which(obj.filename));
             elseif nargin==1
                obj = H5mov(varargin{1}); 
             end
@@ -163,6 +126,20 @@ classdef H5mov < handle
             for ii=1:max(obj.meta.volumes)
                 obj.t(ii)=mean(obj.meta.tframe(obj.meta.volumes==ii));
             end
+        end
+    end
+    methods (Static)
+        function obj = loadobj(s)
+            if ~isa(s.odor_seq,'odor_sequence')
+                s.odor_seq = odor_seq_trad(s.odor_conc_inf,s.odor_inf);
+%                 s.odor_seq.odor_conc_inf = ;
+%                 s.odor_seq.odor_inf = ;
+%                 notWater = ~cellfun(@(x)strcmpi(x,'water'),s.odor_conc_inf(:,2));
+%                 s.odor_seq.odors = categorical(s.odor_conc_inf(notWater,2));
+%                 s.odor_seq.concs = categorical(s.odor_conc_inf(notWater,1));
+            end
+            obj = s;
+            1;
         end
     end
 end
