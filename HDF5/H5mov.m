@@ -40,7 +40,7 @@ classdef H5mov < handle
             fEnd = find(obj.t>(tStart+tCount),1);
             fCount = fEnd-fStart;
             if ~isfield(obj.meta,'piezo')
-                obj = obj.load_movie_metadata;
+                obj.load_movie_metadata;
             end
             mov5D = zeros(obj.d1,obj.d2,obj.d3,fCount,2,'uint16');
             h = waitbar(0,'Loading...');
