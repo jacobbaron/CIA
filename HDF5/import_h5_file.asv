@@ -36,8 +36,8 @@ addpath(pwd)
      pathname=strcat(pwd,filesep);
  end
 
-fname_log = filename_log;
-odor_seq = import_odor_seq_lf(path, filename);
+fname_log = [filename_log];
+odor_seq = import_odor_seq_lf(path, filename)
 %%
 
 if exist('pathname', 'var')
@@ -83,6 +83,8 @@ for ii=1:length(img_stacks)
 end
 clear img1
 %% get the odor sequence
+odor_seq = getodorseq( image_times,  odor_inf, odor_conc_inf);
+
 [odor_start_time, odor_end_time]=calculate_odor_start_end_time(acq_start_time,image_times,odor_seq);
 
 %% save output data
