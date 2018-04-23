@@ -91,7 +91,7 @@ clear img1
 img_data.img_stacks=img_stacks;
 
 img_data.t=image_times;
-img_data.neuron_type=neuron_type;
+%img_data.neuron_type=neuron_type;
 img_data.odor_seq=odor_seq;
 
 img_data.acq_start_time=acq_start_time;
