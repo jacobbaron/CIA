@@ -4,11 +4,8 @@ function [piezo,volumes,lasers,t,img_idx,res,...
     %double(h5read(fname,'/img_idx'));
     DAQ=h5read(fname,'/DAQ');
     res=h5readatt(fname,'/','Resolution');
-    tinfo = h5info(fname,'/t');
-    tstart = double(h5read(fname,'/t',1,2))/1e9;
-    dt = diff(tstart);
-    t = (0:dt:(dt*(tinfo.Dataspace.Size-1)))';
-    %t=double(h5read(fname,'/t'))/1e9;
+    tstart = h5read(fname,'/t',1,2);
+    t=double(h5read(fname,'/t'))/1e9;
     img_idx = 1:length(t);
     piezo=DAQ(img_idx,1);
    
