@@ -17,8 +17,8 @@ function [greenImg,redImg]=get_single_volume(fname,volumes,lasers,piezo,img_idx,
         unique_lasers=find(any(lasers,1));
         
         data3d=reshape(data,res(1),res(2),length(frames));       
-        redImg = zeros(res(1),res(2),d3,'uint16');
-        greenImg = zeros(res(1),res(2),d3,'uint16');
+        redImg = zeros(res(2),res(1),d3,'uint16');
+        greenImg = zeros(res(2),res(1),d3,'uint16');
         for ii=1:length(unique_lasers)
             laser_id=find(lasers(frames,unique_lasers(ii)));
             [~,idx]=sort(piezo(frames(laser_id)));
