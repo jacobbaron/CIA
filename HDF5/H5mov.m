@@ -133,7 +133,7 @@ classdef H5mov < handle
     methods (Static)
         function obj = loadobj(s)
             if ~isa(s.odor_seq,'odor_sequence')
-                s.odor_seq = odor_seq_trad(s.odor_conc_inf,s.odor_inf);
+                %s.odor_seq = odor_seq_trad(s.odor_conc_inf,s.odor_inf);
 %                 s.odor_seq.odor_conc_inf = ;
 %                 s.odor_seq.odor_inf = ;
 %                 notWater = ~cellfun(@(x)strcmpi(x,'water'),s.odor_conc_inf(:,2));
