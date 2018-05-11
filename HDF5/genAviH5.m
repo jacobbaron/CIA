@@ -23,8 +23,8 @@ end
 pixelSize=[.27,...
                     .27,...
                     zdiff_size(1)];
-d1 = res(1);
-d2 = res(2);
+d1 = res(2);
+d2 = res(1);
 d3 = length(unique(piezo));
 T = length(image_times);
 x2z = pixelSize(3)/pixelSize(2);
