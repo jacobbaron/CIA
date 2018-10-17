@@ -66,7 +66,9 @@ end
 which_lasers=find(any(lasers,1));
 zstack_pos=20*(piezo(volumes==1 & lasers(:,which_lasers(1))));
 zdiff_size=diff(zstack_pos);
-
+if isempty(zdiff_size)
+    zdiff_size = 0;
+end
 %initialize array
 img1=initialize_imgs(volumes,lasers,res,img_idx);
 x=waitbar(0,'Loading');
