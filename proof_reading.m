@@ -512,7 +512,7 @@ if ~isempty(handles.signal)
 %         xlabel('frame'); ylabel('\delta F/F');
 %     end
     
-    handles.normalized_signal = nm_signal(handles.signal, handles.odor_seq);
+    handles.normalized_signal = nm_signal(handles.signal, handles.odor_seq,handles.image_times);
     
     [~, handles.figureH]=curve_plot( handles.normalized_signal, handles.image_times, handles.odor_seq);
 end
