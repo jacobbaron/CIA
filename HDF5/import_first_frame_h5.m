@@ -18,8 +18,8 @@ img = get_volume(fname,1,lasers,piezo,img_idx,res,volumes,img);
 img = img(:,:,:,1,:);
 img = flip(flip(permute(img,[2,1,3,4,5]),1),3);
 imgSize = size(img);
-imgRGB = zeros(imgSize(1),imgSize(2),3);
-imgRGB(:,:,[2,1]) = squeeze(max(img,[],3));
+%imgRGB = zeros(imgSize(1),imgSize(2),3);
+imgRGB = double(flip(squeeze(max(img,[],3)),3));
 for ii=1:size(imgRGB,3)
     imgColor = imgRGB(:,:,ii);
     if any(imgColor(:)>0)

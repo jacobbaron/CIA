@@ -11,6 +11,7 @@ path = [currentFolder, 'data\'];
 load([path, 'odor_inf'], 'odor_list', 'odor_concentration_list', 'odor_colormap');
 
 addpath(pwd)
+path = pwd;
 %if no filename is specified, ask
 if ~exist('filename','var') && ~exist('filename_log','var')
     [filename,pathname]  = uigetfile({'*.nd2'});  
@@ -233,7 +234,8 @@ end
 
     
 %% get the odor sequence
-odor_seq = getodorseq( image_times,  odor_inf, odor_conc_inf);
+odor_seq = import_odor_seq_lf(path, filename_log);
+%getodorseq( image_times,  odor_inf, odor_conc_inf);
 
 [odor_start_time, odor_end_time]=calculate_odor_start_end_time(acq_start_time,image_times,odor_seq);
 
